@@ -57,7 +57,7 @@ const NutritionPanel: React.FC<NutritionPanelProps> = ({
             </h3>
             <div className="flex items-center gap-1 text-xs text-primary font-body">
               <Sparkles className="w-3 h-3" />
-              AI-powered analysis
+              Gemini AI-powered analysis
             </div>
           </div>
         </div>
