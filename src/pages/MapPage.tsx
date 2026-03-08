@@ -1,10 +1,11 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Play, Square, ChevronRight, ArrowLeft, Volume2, Check } from "lucide-react";
 import { toast } from "sonner";
 import StoreMapSVG from "@/components/StoreMapSVG";
 import NutritionPanel from "@/components/NutritionPanel";
+import { useArduinoSerial } from "@/hooks/useArduinoSerial";
 
 type GroceryItem = {
   id: string;
@@ -71,6 +72,25 @@ const MapPage = () => {
   const [waypoints, setWaypoints] = useState<Point[]>([]);
   const [waypointIndex, setWaypointIndex] = useState(0);
 
+  const {
+    isSupported,
+    isConnected,
+    isRunning,
+    isObstacleBlocked,
+    lastDistanceCm,
+    error: serialError,
+    isCommandPending,
+    connect,
+    disconnect,
+    sendStart,
+    sendStop,
+    ping,
+  } = useArduinoSerial();
+
+  const previousObstacleBlockedRef = useRef(false);
+  const previousSerialErrorRef = useRef<string | null>(null);
+  const arrivalNotifiedRef = useRef(false);
+
   const currentItem = ITEMS[currentItemIndex];
   const allCollected = collectedItems.length === ITEMS.length;
 
@@ -83,50 +103,112 @@ const MapPage = () => {
   const displayPath = isMoving ? waypoints.slice(waypointIndex) : previewPath;
 
   useEffect(() => {
-    if (!isMoving || waypoints.length === 0) return;
-    const target = waypoints[waypointIndex];
-    if (!target) return;
+    setIsMoving(isRunning && !isObstacleBlocked);
+  }, [isRunning, isObstacleBlocked]);
+
+  useEffect(() => {
+    if (isObstacleBlocked && !previousObstacleBlockedRef.current) {
+      const distanceLabel = lastDistanceCm !== null ? `${lastDistanceCm} cm` : "nearby";
+      toast.error(`Obstacle detected: ${distanceLabel}`);
+    }
+
+    previousObstacleBlockedRef.current = isObstacleBlocked;
+  }, [isObstacleBlocked, lastDistanceCm]);
+
+  useEffect(() => {
+    if (serialError && serialError !== previousSerialErrorRef.current) {
+      toast.error(serialError);
+      previousSerialErrorRef.current = serialError;
+    }
+
+    if (!serialError) {
+      previousSerialErrorRef.current = null;
+    }
+  }, [serialError]);
+
+  useEffect(() => {
+    if (!isMoving || !currentItem) return;
+
+    const target = { x: currentItem.x, y: currentItem.y };
     const speed = 2;
+
     const interval = setInterval(() => {
       setCartPosition((prev) => {
         const dx = target.x - prev.x;
         const dy = target.y - prev.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
+
         if (dist < speed) {
-          if (waypointIndex < waypoints.length - 1) {
-            setWaypointIndex((i) => i + 1);
-          } else {
-            setIsMoving(false);
+          if (!arrivalNotifiedRef.current) {
+            arrivalNotifiedRef.current = true;
             setArrived(true);
-            toast.success(`Found ${currentItem!.emoji} ${currentItem!.name}!`);
+            toast.success(`Found ${currentItem.emoji} ${currentItem.name}!`);
           }
           return target;
         }
+
         return {
           x: prev.x + (dx / dist) * speed,
           y: prev.y + (dy / dist) * speed,
         };
       });
     }, 16);
+
     return () => clearInterval(interval);
   }, [isMoving, waypointIndex, waypoints, currentItem]);
 
-  const handleStart = () => {
-    if (!currentItem) return;
-    const path = computePath(cartPosition, { x: currentItem.x, y: currentItem.y });
-    setWaypoints(path);
-    setWaypointIndex(0);
-    setIsMoving(true);
-    setArrived(false);
-  };
+  useEffect(() => {
+    if (!arrived || !isRunning) return;
 
-  const handleStop = () => setIsMoving(false);
+    const stopOnArrival = async () => {
+      await sendStop();
+    };
+
+    void stopOnArrival();
+  }, [arrived, isRunning, sendStop]);
+
+  const handleConnectArduino = useCallback(async () => {
+    const connected = await connect();
+    if (!connected) return;
+
+    toast.success("Arduino connected");
+    const responded = await ping();
+    if (!responded) {
+      toast.error("Connected, but no PONG response from Arduino");
+    }
+  }, [connect, ping]);
+
+  const handleDisconnectArduino = useCallback(async () => {
+    await disconnect();
+    toast.success("Arduino disconnected");
+  }, [disconnect]);
+
+  const handleStart = useCallback(async () => {
+    if (!currentItem || !isConnected) return;
+
+    arrivalNotifiedRef.current = false;
+    setArrived(false);
+    const started = await sendStart();
+
+    if (started) {
+      toast.success("Robot started");
+    }
+  }, [currentItem, isConnected, sendStart]);
+
+  const handleStop = useCallback(async () => {
+    const stopped = await sendStop();
+
+    if (stopped) {
+      toast.success("Robot stopped");
+    }
+  }, [sendStop]);
 
   const handleCollect = () => {
     if (!currentItem) return;
     setCollectedItems((prev) => [...prev, currentItem.id]);
     setShowNutrition(currentItem.id);
     setArrived(false);
+    arrivalNotifiedRef.current = false;
   };
 
   const handleNextItem = () => {
@@ -134,6 +216,7 @@ const MapPage = () => {
     if (currentItemIndex < ITEMS.length - 1) {
       setCurrentItemIndex((prev) => prev + 1);
       setArrived(false);
+      arrivalNotifiedRef.current = false;
     }
   };
 
@@ -168,21 +251,50 @@ const MapPage = () => {
   return (
     <div className="min-h-screen sky-gradient relative overflow-hidden">
       {/* Header */}
-      <div className="relative z-20 flex items-center justify-between px-5 py-4">
-        <button onClick={() => navigate("/")} className="flex items-center gap-1 text-white/80 hover:text-white transition-colors text-sm font-body">
-          <ArrowLeft className="w-4 h-4" /> Back
-        </button>
-        {/* <h1 className="font-display font-bold text-white text-base tracking-wide">Store Map</h1> */}
-        <button
-          onClick={handleVoiceGuidance}
-          disabled={isVoicePlaying}
-          className="text-white/80 hover:text-white transition-colors disabled:opacity-40"
-        >
-          <Volume2 className={`w-4 h-4 ${isVoicePlaying ? "animate-pulse-dot" : ""}`} />
-        </button>
+      <div className="relative z-20 flex items-center justify-between px-4 py-3 gap-2">
+        <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="text-muted-foreground">
+          <ArrowLeft className="w-4 h-4 mr-1" /> Back
+        </Button>
+        <h1 className="font-display font-bold text-foreground text-lg">Store Map</h1>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={isConnected ? handleDisconnectArduino : handleConnectArduino}
+            disabled={!isSupported || isCommandPending}
+            className="text-muted-foreground"
+          >
+            {isConnected ? "Disconnect" : "Connect"}
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleVoiceGuidance}
+            disabled={isVoicePlaying}
+            className="text-muted-foreground"
+          >
+            <Volume2 className={`w-4 h-4 ${isVoicePlaying ? "animate-pulse-dot" : ""}`} />
+          </Button>
+        </div>
       </div>
 
-      <main className="relative z-10 max-w-xl mx-auto px-5 pb-28">
+      <main className="relative z-10 max-w-xl mx-auto px-4 pb-32">
+        {!isSupported ? (
+          <div className="grocery-card mb-4 p-3 text-sm text-muted-foreground font-body animate-slide-up">
+            Web Serial is unsupported in this browser. Use Chrome or Edge over HTTPS/localhost.
+          </div>
+        ) : (
+          <div className="grocery-card mb-4 p-3 text-sm font-body animate-slide-up">
+            <span className="text-muted-foreground">Arduino: </span>
+            <span className={isConnected ? "text-primary font-semibold" : "text-muted-foreground"}>
+              {isConnected ? (isRunning ? "Running" : "Connected") : "Disconnected"}
+            </span>
+            {isObstacleBlocked && (
+              <span className="text-destructive ml-2">Obstacle {lastDistanceCm !== null ? `(${lastDistanceCm} cm)` : ""}</span>
+            )}
+          </div>
+        )}
+
         {allCollected && !showNutrition ? (
           <div className="text-center py-16 animate-slide-up">
             <div className="text-5xl mb-3">🎉</div>
@@ -239,10 +351,22 @@ const MapPage = () => {
                 </Button>
               ) : (
                 <>
-                  <Button variant="hero" size="lg" className="rounded-full px-8 shadow-md" onClick={handleStart} disabled={isMoving}>
+                  <Button
+                    variant="hero"
+                    size="lg"
+                    className="rounded-full px-8"
+                    onClick={handleStart}
+                    disabled={isCommandPending || !isConnected || isRunning}
+                  >
                     <Play className="w-4 h-4 mr-1" /> Start
                   </Button>
-                  <Button variant="secondary" size="lg" className="rounded-full px-8" onClick={handleStop} disabled={!isMoving}>
+                  <Button
+                    variant="secondary"
+                    size="lg"
+                    className="rounded-full px-8"
+                    onClick={handleStop}
+                    disabled={isCommandPending || !isConnected || !isRunning}
+                  >
                     <Square className="w-4 h-4 mr-1" /> Stop
                   </Button>
                 </>
