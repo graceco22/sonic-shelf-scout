@@ -56,9 +56,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen sky-gradient relative overflow-hidden">
-      {/* Mountain wave */}
-      <div className="mountain-wave" />
-
       {/* Logout button */}
       <div className="absolute top-4 right-4 z-20">
         <Button variant="ghost" size="icon" onClick={handleLogout} className="text-muted-foreground">
@@ -68,11 +65,11 @@ const Index = () => {
 
       <main className="relative z-10 flex flex-col items-center px-4 pt-10 pb-32 max-w-lg mx-auto">
         {/* Title */}
-        <h1 className="text-2xl font-display font-bold text-primary text-center mb-4 animate-slide-up w-full max-w-xl whitespace-nowrap">
+        <h1 className="text-2xl font-display font-bold text-white text-center mb-4 animate-slide-up w-full max-w-xl whitespace-nowrap">
           Add groceries to your list!
         </h1>
 
-        {/* Floating grocery emojis */}
+        {/* Floating grocery emojis
         <br></br>
         <div className="relative w-full h-16 animate-slide-up" style={{ animationDelay: "0.05s" }}>
           <span className="absolute left-[5%] top-2 text-2xl animate-float" style={{ animationDelay: "0s" }}>🥬</span>
@@ -80,7 +77,7 @@ const Index = () => {
           <span className="absolute left-[42%] top-1 text-2xl animate-float" style={{ animationDelay: "0.6s" }}>🥛</span>
           <span className="absolute left-[62%] top-0 text-2xl animate-float" style={{ animationDelay: "0.9s" }}>🍎</span>
           <span className="absolute left-[80%] top-2 text-2xl animate-float" style={{ animationDelay: "1.2s" }}>🍖</span>
-        </div>
+        </div> */}
 
         {/* Mascot with basket */}
         <div className="mb-1 animate-slide-up" style={{ animationDelay: "0.1s" }}>
@@ -100,7 +97,7 @@ const Index = () => {
 
         {/* Item List */}
         <div className="w-full animate-slide-up" style={{ animationDelay: "0.2s" }}>
-          <h2 className="text-lg font-display font-bold text-foreground text-center mb-4">Item List</h2>
+          <h2 className="text-lg font-display font-bold text-white text-center mb-4">Item List</h2>
 
           <div className="space-y-3">
             {GROCERY_ITEMS.map((item) => (

@@ -25,24 +25,24 @@ const StoreMapSVG: React.FC<StoreMapSVGProps> = ({
   isMoving,
 }) => {
   return (
-    <svg viewBox="0 0 550 400" className="w-full h-auto rounded-2xl" style={{ background: "hsl(210, 100%, 97%)" }}>
+    <svg viewBox="0 0 550 400" className="w-full h-auto rounded-xl" style={{ background: "hsl(220, 40%, 98%)" }}>
       {/* Store Floor */}
-      <rect x="10" y="10" width="530" height="380" rx="16" fill="hsl(210, 60%, 95%)" stroke="hsl(210, 30%, 90%)" strokeWidth="2" />
+      <rect x="10" y="10" width="530" height="380" rx="14" fill="hsl(220, 30%, 96%)" stroke="hsl(220, 20%, 90%)" strokeWidth="1.5" />
 
       {/* Aisles */}
-      <rect x="140" y="60" width="40" height="280" rx="6" fill="hsl(210, 40%, 90%)" />
-      <rect x="250" y="60" width="40" height="280" rx="6" fill="hsl(210, 40%, 90%)" />
-      <rect x="360" y="60" width="40" height="280" rx="6" fill="hsl(210, 40%, 90%)" />
+      <rect x="140" y="60" width="38" height="280" rx="8" fill="hsl(220, 25%, 92%)" />
+      <rect x="250" y="60" width="38" height="280" rx="8" fill="hsl(220, 25%, 92%)" />
+      <rect x="360" y="60" width="38" height="280" rx="8" fill="hsl(220, 25%, 92%)" />
 
       {/* Aisle Labels */}
-      <text x="160" y="52" textAnchor="middle" fontSize="10" fontWeight="bold" fill="hsl(220, 15%, 50%)">Aisle 1</text>
-      <text x="270" y="52" textAnchor="middle" fontSize="10" fontWeight="bold" fill="hsl(220, 15%, 50%)">Aisle 2</text>
-      <text x="380" y="52" textAnchor="middle" fontSize="10" fontWeight="bold" fill="hsl(220, 15%, 50%)">Aisle 3</text>
+      <text x="159" y="52" textAnchor="middle" fontSize="9" fontWeight="600" fill="hsl(220, 15%, 58%)" fontFamily="DM Sans, sans-serif">Aisle 1</text>
+      <text x="269" y="52" textAnchor="middle" fontSize="9" fontWeight="600" fill="hsl(220, 15%, 58%)" fontFamily="DM Sans, sans-serif">Aisle 2</text>
+      <text x="379" y="52" textAnchor="middle" fontSize="9" fontWeight="600" fill="hsl(220, 15%, 58%)" fontFamily="DM Sans, sans-serif">Aisle 3</text>
 
       {/* Section Labels */}
-      <text x="70" y="370" textAnchor="middle" fontSize="11" fontWeight="bold" fill="hsl(220, 80%, 55%)">🥬 Produce</text>
-      <text x="480" y="370" textAnchor="middle" fontSize="11" fontWeight="bold" fill="hsl(220, 80%, 55%)">🧊 Dairy</text>
-      <text x="480" y="52" textAnchor="middle" fontSize="11" fontWeight="bold" fill="hsl(220, 80%, 55%)">🏪 Entrance</text>
+      <text x="70" y="370" textAnchor="middle" fontSize="10" fontWeight="600" fill="hsl(220, 50%, 50%)" fontFamily="DM Sans, sans-serif">🥬 Produce</text>
+      <text x="480" y="370" textAnchor="middle" fontSize="10" fontWeight="600" fill="hsl(220, 50%, 50%)" fontFamily="DM Sans, sans-serif">🧊 Dairy</text>
+      <text x="480" y="52" textAnchor="middle" fontSize="10" fontWeight="600" fill="hsl(220, 50%, 50%)" fontFamily="DM Sans, sans-serif">🏪 Entrance</text>
 
       {/* Animated path to target */}
       {targetItem && !collectedItems.includes(targetItem.id) && (
@@ -51,11 +51,11 @@ const StoreMapSVG: React.FC<StoreMapSVGProps> = ({
           y1={cartPosition.y}
           x2={targetItem.x}
           y2={targetItem.y}
-          stroke="hsl(220, 80%, 55%)"
-          strokeWidth="2.5"
-          strokeDasharray="8 4"
+          stroke="hsl(220, 60%, 60%)"
+          strokeWidth="2"
+          strokeDasharray="6 4"
           strokeLinecap="round"
-          opacity="0.6"
+          opacity="0.5"
         >
           <animate attributeName="stroke-dashoffset" from="24" to="0" dur="1s" repeatCount="indefinite" />
         </line>
@@ -69,18 +69,18 @@ const StoreMapSVG: React.FC<StoreMapSVGProps> = ({
         return (
           <g key={item.id}>
             {isCurrent && (
-              <circle cx={item.x} cy={item.y} r="22" fill="none" stroke="hsl(220, 80%, 55%)" strokeWidth="2" opacity="0.4">
-                <animate attributeName="r" values="22;30;22" dur="1.5s" repeatCount="indefinite" />
-                <animate attributeName="opacity" values="0.4;0;0.4" dur="1.5s" repeatCount="indefinite" />
+              <circle cx={item.x} cy={item.y} r="22" fill="none" stroke="hsl(220, 60%, 60%)" strokeWidth="1.5" opacity="0.4">
+                <animate attributeName="r" values="22;28;22" dur="1.8s" repeatCount="indefinite" />
+                <animate attributeName="opacity" values="0.4;0;0.4" dur="1.8s" repeatCount="indefinite" />
               </circle>
             )}
             <circle
               cx={item.x}
               cy={item.y}
-              r="18"
-              fill={isCollected ? "hsl(220, 80%, 92%)" : isCurrent ? "hsl(220, 80%, 95%)" : "hsl(210, 40%, 94%)"}
-              stroke={isCollected ? "hsl(220, 80%, 55%)" : isCurrent ? "hsl(220, 80%, 55%)" : "hsl(210, 30%, 85%)"}
-              strokeWidth="2"
+              r="17"
+              fill={isCollected ? "hsl(150, 40%, 92%)" : isCurrent ? "white" : "hsl(220, 20%, 95%)"}
+              stroke={isCollected ? "hsl(150, 50%, 60%)" : isCurrent ? "hsl(220, 60%, 60%)" : "hsl(220, 15%, 88%)"}
+              strokeWidth="1.5"
             />
             <text x={item.x} y={item.y + 5} textAnchor="middle" fontSize="16">
               {isCollected ? "✅" : item.emoji}
@@ -91,12 +91,12 @@ const StoreMapSVG: React.FC<StoreMapSVGProps> = ({
 
       {/* Cart */}
       <g>
-        <circle cx={cartPosition.x} cy={cartPosition.y} r="14" fill="hsl(340, 65%, 80%)" stroke="hsl(340, 65%, 60%)" strokeWidth="2">
+        <circle cx={cartPosition.x} cy={cartPosition.y} r="13" fill="hsl(340, 50%, 90%)" stroke="hsl(340, 50%, 70%)" strokeWidth="1.5">
           {isMoving && (
-            <animate attributeName="r" values="14;16;14" dur="0.6s" repeatCount="indefinite" />
+            <animate attributeName="r" values="13;15;13" dur="0.7s" repeatCount="indefinite" />
           )}
         </circle>
-        <text x={cartPosition.x} y={cartPosition.y + 5} textAnchor="middle" fontSize="14">🐰</text>
+        <text x={cartPosition.x} y={cartPosition.y + 5} textAnchor="middle" fontSize="13">🐰</text>
       </g>
     </svg>
   );

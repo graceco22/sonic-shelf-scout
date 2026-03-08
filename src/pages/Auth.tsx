@@ -52,9 +52,6 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen sky-gradient flex flex-col items-center justify-center p-4 relative overflow-hidden">
-      {/* Mountain wave decoration */}
-      <div className="mountain-wave" />
-
       <div className="w-full max-w-md relative z-10">
         {/* Mascot */}
         <div className="text-center mb-6 animate-slide-up">
@@ -63,7 +60,7 @@ const Auth = () => {
             alt="GroceryGuide mascot"
             className="w-50 h-40 mx-auto mb-5 animate-float"
           />
-          <h1 className="text-3xl font-display font-bold text-foreground">GroceryGuide</h1>
+          <h1 className="text-3xl font-display font-bold text-white">GroceryGuide</h1>
           <p className="text-muted-foreground mt-1 font-body text-sm">Your smart grocery companion</p>
         </div>
 

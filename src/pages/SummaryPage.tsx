@@ -58,8 +58,6 @@ const SummaryPage = () => {
 
   return (
     <div className="min-h-screen sky-gradient relative overflow-hidden">
-      <div className="mountain-wave" />
-
       {/* Header */}
       <div className="relative z-20 flex items-center justify-between px-4 -mb-8">
         <Button variant="ghost" size="sm" onClick={() => navigate("/map")} className="text-muted-foreground">
@@ -71,7 +69,7 @@ const SummaryPage = () => {
         {/* Celebration */}
         <div className="text-center mb-6 animate-slide-up">
           <img src={mascotImg} alt="Mascot" className="w-50 h-40 mx-auto mb-3 animate-float" />
-          <h2 className="text-2xl font-display font-bold text-foreground">Great Job!</h2>
+          <h2 className="text-2xl font-display font-bold text-white">Great Job!</h2>
           <p className="text-muted-foreground font-body text-sm mt-1">
             You collected all {items.length} items
           </p>

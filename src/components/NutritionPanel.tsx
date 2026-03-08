@@ -48,29 +48,31 @@ const NutritionPanel: React.FC<NutritionPanelProps> = ({
 
   return (
     <div className="w-full animate-slide-up">
-      <div className="grocery-card mb-4">
-        <div className="flex items-center gap-3 mb-4">
-          <span className="text-4xl">{itemEmoji}</span>
+      <div className="grocery-card mb-3">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center">
+            <span className="text-2xl">{itemEmoji}</span>
+          </div>
           <div>
-            <h3 className="font-display font-bold text-xl text-foreground">
+            <h3 className="font-display font-semibold text-sm text-foreground">
               {itemName} — Nutrition
             </h3>
-            <div className="flex items-center gap-1 text-xs text-primary font-body">
-              <Sparkles className="w-3 h-3" />
-              Gemini AI-powered analysis
+            <div className="flex items-center gap-1 text-[10px] text-primary/70 font-body">
+              <Sparkles className="w-2.5 h-2.5" />
+              Gemini AI-powered
             </div>
           </div>
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center py-8 gap-2 text-muted-foreground">
-            <Loader2 className="w-5 h-5 animate-spin" />
-            <span className="font-body">Analyzing...</span>
+          <div className="flex items-center justify-center py-6 gap-2 text-muted-foreground">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            <span className="font-body text-sm">Analyzing...</span>
           </div>
         ) : (
-          <div className="prose prose-sm max-w-none font-body text-foreground">
+          <div className="font-body text-foreground text-sm leading-relaxed">
             {analysis.split("\n").map((line, i) => (
-              <p key={i} className={`${line.startsWith("•") ? "ml-4" : ""} ${line.startsWith("_") ? "text-muted-foreground italic text-xs" : ""} mb-1`}>
+              <p key={i} className={`${line.startsWith("•") ? "ml-3 text-muted-foreground" : ""} ${line.startsWith("_") ? "text-muted-foreground italic text-xs" : ""} mb-0.5`}>
                 {line.replace(/\*\*/g, "").replace(/_/g, "")}
               </p>
             ))}
@@ -79,7 +81,7 @@ const NutritionPanel: React.FC<NutritionPanelProps> = ({
       </div>
 
       <div className="text-center">
-        <Button variant="hero" size="lg" className="rounded-full px-10" onClick={onContinue}>
+        <Button variant="hero" size="lg" className="rounded-full px-10 shadow-md" onClick={onContinue}>
           {isLastItem ? "Finish Shopping 🎉" : "Next Item"}
           <ChevronRight className="w-4 h-4 ml-1" />
         </Button>

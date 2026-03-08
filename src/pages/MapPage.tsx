@@ -114,32 +114,28 @@ const MapPage = () => {
 
   return (
     <div className="min-h-screen sky-gradient relative overflow-hidden">
-      <div className="mountain-wave" />
-
       {/* Header */}
-      <div className="relative z-20 flex items-center justify-between px-4 py-3">
-        <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="text-muted-foreground">
-          <ArrowLeft className="w-4 h-4 mr-1" /> Back
-        </Button>
-        <h1 className="font-display font-bold text-foreground text-lg">Store Map</h1>
-        <Button
-          variant="ghost"
-          size="sm"
+      <div className="relative z-20 flex items-center justify-between px-5 py-4">
+        <button onClick={() => navigate("/")} className="flex items-center gap-1 text-white/80 hover:text-white transition-colors text-sm font-body">
+          <ArrowLeft className="w-4 h-4" /> Back
+        </button>
+        {/* <h1 className="font-display font-bold text-white text-base tracking-wide">Store Map</h1> */}
+        <button
           onClick={handleVoiceGuidance}
           disabled={isVoicePlaying}
-          className="text-muted-foreground"
+          className="text-white/80 hover:text-white transition-colors disabled:opacity-40"
         >
           <Volume2 className={`w-4 h-4 ${isVoicePlaying ? "animate-pulse-dot" : ""}`} />
-        </Button>
+        </button>
       </div>
 
-      <main className="relative z-10 max-w-xl mx-auto px-4 pb-32">
+      <main className="relative z-10 max-w-xl mx-auto px-5 pb-28">
         {allCollected && !showNutrition ? (
-          <div className="text-center py-12 animate-slide-up">
-            <div className="text-6xl mb-4">🎉</div>
-            <h2 className="text-2xl font-display font-bold text-foreground mb-2">All Items Collected!</h2>
-            <p className="text-muted-foreground font-body mb-6">Great job on your healthy grocery run!</p>
-            <Button variant="hero" className="rounded-full px-10" onClick={() => navigate("/summary", { state: { items: ITEMS.map(i => ({ name: i.name, emoji: i.emoji, price: i.price })) } })}>
+          <div className="text-center py-16 animate-slide-up">
+            <div className="text-5xl mb-3">🎉</div>
+            <h2 className="text-xl font-display font-bold text-white mb-1">All Items Collected!</h2>
+            <p className="text-white/60 font-body text-sm mb-8">Great job on your healthy grocery run</p>
+            <Button variant="hero" className="rounded-full px-10 shadow-lg" onClick={() => navigate("/summary", { state: { items: ITEMS.map(i => ({ name: i.name, emoji: i.emoji, price: i.price })) } })}>
               View Shopping Summary
             </Button>
           </div>
@@ -154,21 +150,23 @@ const MapPage = () => {
         ) : (
           <>
             {/* Current Target */}
-            <div className="grocery-card mb-4 animate-slide-up">
+            <div className="grocery-card mb-3 animate-slide-up">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <span className="text-3xl">{currentItem?.emoji}</span>
+                  <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <span className="text-2xl">{currentItem?.emoji}</span>
+                  </div>
                   <div>
-                    <h3 className="font-display font-bold text-foreground">{currentItem?.name}</h3>
-                    <p className="text-sm text-muted-foreground font-body">{currentItem?.aisle}</p>
+                    <h3 className="font-display font-semibold text-foreground text-sm">{currentItem?.name}</h3>
+                    <p className="text-xs text-muted-foreground font-body">{currentItem?.aisle}</p>
                   </div>
                 </div>
-                <span className="text-sm text-muted-foreground font-body">{currentItem?.price}</span>
+                <span className="text-xs font-body font-semibold text-foreground">{currentItem?.price}</span>
               </div>
             </div>
 
             {/* Map */}
-            <div className="grocery-card mb-4 p-2 overflow-hidden animate-slide-up" style={{ animationDelay: "0.1s" }}>
+            <div className="grocery-card mb-3 p-1.5 overflow-hidden animate-slide-up" style={{ animationDelay: "0.1s" }}>
               <StoreMapSVG
                 cartPosition={cartPosition}
                 targetItem={currentItem}
@@ -179,15 +177,15 @@ const MapPage = () => {
             </div>
 
             {/* Controls */}
-            <div className="flex gap-3 justify-center mb-6 animate-slide-up" style={{ animationDelay: "0.15s" }}>
+            <div className="flex gap-2.5 justify-center mb-5 animate-slide-up" style={{ animationDelay: "0.15s" }}>
               {arrived ? (
-                <Button variant="hero" size="lg" className="rounded-full px-8" onClick={handleCollect}>
+                <Button variant="hero" size="lg" className="rounded-full px-8 shadow-md" onClick={handleCollect}>
                   Collect {currentItem?.emoji} {currentItem?.name}
                   <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               ) : (
                 <>
-                  <Button variant="hero" size="lg" className="rounded-full px-8" onClick={handleStart} disabled={isMoving}>
+                  <Button variant="hero" size="lg" className="rounded-full px-8 shadow-md" onClick={handleStart} disabled={isMoving}>
                     <Play className="w-4 h-4 mr-1" /> Start
                   </Button>
                   <Button variant="secondary" size="lg" className="rounded-full px-8" onClick={handleStop} disabled={!isMoving}>
@@ -197,24 +195,36 @@ const MapPage = () => {
               )}
             </div>
 
+            {/* Progress bar */}
+            <div className="mb-4 animate-slide-up" style={{ animationDelay: "0.18s" }}>
+              <div className="flex justify-between items-center mb-1.5">
+                <span className="text-xs font-body font-semibold text-white/80">Progress</span>
+                <span className="text-xs font-body text-white/60">{collectedItems.length}/{ITEMS.length}</span>
+              </div>
+              <div className="h-1.5 bg-white/20 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-white rounded-full transition-all duration-500 ease-out"
+                  style={{ width: `${(collectedItems.length / ITEMS.length) * 100}%` }}
+                />
+              </div>
+            </div>
+
             {/* Item List */}
             <div className="animate-slide-up" style={{ animationDelay: "0.2s" }}>
-              <h2 className="text-lg font-display font-bold text-foreground text-center mb-1">Item List</h2>
-              <p className="text-sm text-muted-foreground font-body text-center mb-3">
-                {collectedItems.length}/{ITEMS.length} collected
-              </p>
-              <div className="space-y-3">
+              <h2 className="text-sm font-display font-semibold text-white/90 mb-2">Shopping List</h2>
+              <div className="space-y-2">
                 {ITEMS.map((item) => {
                   const isCollected = collectedItems.includes(item.id);
                   return (
-                    <div key={item.id} className={`grocery-card flex items-center gap-4 p-4 ${isCollected ? "opacity-60" : ""}`}>
-                      <span className="text-2xl">{item.emoji}</span>
-                      <div className="flex-1">
-                        <span className="font-display font-bold text-foreground">{item.name}</span>
-                        <span className="text-sm text-muted-foreground font-body ml-2">{item.aisle} · {item.price}</span>
+                    <div key={item.id} className={`grocery-card flex items-center gap-3 p-3 ${isCollected ? "opacity-50" : ""}`}>
+                      <span className="text-lg">{item.emoji}</span>
+                      <div className="flex-1 min-w-0">
+                        <span className="font-display font-semibold text-foreground text-sm">{item.name}</span>
+                        <span className="text-xs text-muted-foreground font-body ml-1.5">{item.aisle}</span>
                       </div>
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isCollected ? "bg-primary text-primary-foreground" : "bg-primary/10 border-2 border-primary/30"}`}>
-                        <Check className="w-4 h-4" />
+                      <span className="text-xs font-body text-muted-foreground mr-2">{item.price}</span>
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${isCollected ? "bg-primary text-white" : "border border-border"}`}>
+                        {isCollected && <Check className="w-3.5 h-3.5" />}
                       </div>
                     </div>
                   );

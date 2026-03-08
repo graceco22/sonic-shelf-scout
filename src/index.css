@@ -1,8 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&family=DM+Sans:wght@400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&family=Nunito:wght@400;500;600;700;800&display=swap');
 
 @layer base {
   :root {
@@ -50,8 +50,8 @@
     --shadow-card: 0 4px 20px -4px hsl(220 80% 55% / 0.1);
     --shadow-elevated: 0 8px 30px -8px hsl(220 40% 20% / 0.15);
 
-    --font-display: 'Fredoka', sans-serif;
-    --font-body: 'Nunito', sans-serif;
+    --font-display: 'Quicksand', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -81,7 +81,7 @@
 
 @layer components {
   .sky-gradient {
-    background: var(--gradient-sky);
+    background: url('@/assets/background.png') center/cover no-repeat fixed;
   }
 
   .grocery-card {
@@ -107,15 +107,7 @@
     background: var(--gradient-fun);
   }
 
-  .mountain-wave {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 120px;
-    background: linear-gradient(180deg, transparent 0%, hsl(210, 60%, 92%) 40%, hsl(210, 50%, 96%) 100%);
-    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
-  }
+
 }
 
 @keyframes cart-bounce {
