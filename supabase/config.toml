@@ -1,1 +1,7 @@
 project_id = "hwofgwsssgdiuhzxudia"
+
+[functions.nutrition-analysis]
+verify_jwt = false
+
+[functions.voice-guidance]
+verify_jwt = false
