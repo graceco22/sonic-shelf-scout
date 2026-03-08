@@ -10,32 +10,29 @@ serve(async (req) => {
 
   try {
     const { items } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is not configured");
 
     const itemList = items.map((i: { name: string; price: string }) => `${i.name} (${i.price})`).join(", ");
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          {
-            role: "system",
-            content:
-              "You are a friendly nutritionist and grocery shopping advisor. The user just completed a grocery shopping trip. Provide a fun, encouraging summary with these sections formatted with headings (use **heading**) and bullet points (•):\n\n1. **Trip Summary** — quick recap of what they bought and total estimated cost\n2. **Nutrition Highlights** — top vitamins, minerals, and health benefits from their items combined\n3. **Meal Idea** — one easy meal they can make using the items they bought\n4. **Health Score** — rate their cart 1-10 with a short explanation\n5. **Pro Tip** — one actionable tip for their next grocery run\n\nKeep it under 300 words. Be encouraging, use emojis sparingly.",
-          },
-          {
-            role: "user",
-            content: `I just finished my grocery shopping trip! Here's what I bought: ${itemList}. Give me a fun summary and insights about my purchase.`,
-          },
-        ],
-      }),
-    });
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                {
+                  text: `You are a friendly nutritionist and grocery shopping advisor. The user just completed a grocery shopping trip. Respond with EXACTLY these two sections, using this format:\n\n**Nutritional Facts**\n• [Nutrient]: [Amount or benefit] — from [item]\n(List 6-8 key vitamins, minerals, protein, fiber, etc. that the purchased items provide. Be specific with nutrient names and which item they come from.)\n\n**Suggested Additions**\n• [Item emoji] [Item name] — [reason why it complements what they bought]\n(Suggest 4-5 grocery items they should add next time to round out their nutrition or make complete meals. Focus on what's missing from their cart.)\n\nRules:\n- Use • for every bullet point\n- Keep each bullet to one line\n- No intro or outro text, jump straight into the first heading\n- Be specific and practical, not generic\n- Keep total response under 250 words\n\nHere's what I bought: ${itemList}. Give me the nutritional facts and suggestions.`,
+                },
+              ],
+            },
+          ],
+        }),
+      }
+    );
 
     if (!response.ok) {
       if (response.status === 429) {
@@ -56,7 +53,7 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    const summary = data.choices?.[0]?.message?.content || "Summary unavailable.";
+    const summary = data.candidates?.[0]?.content?.parts?.[0]?.text || "Summary unavailable.";
 
     return new Response(JSON.stringify({ summary }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

@@ -36,9 +36,12 @@ const SummaryPage = () => {
         console.error("Shopping summary error:", err);
         const itemNames = items.map((i) => i.emoji + " " + i.name).join(", ");
         setSummary(
-          `**Trip Summary**\n\nYou picked up: ${itemNames}.\n\n` +
-            `• Great choices for a balanced diet!\n` +
-            `• These items provide essential nutrients for your daily needs.\n\n` +
+          `**Nutritional Facts**\n` +
+            `• Essential vitamins and minerals — from ${itemNames}\n` +
+            `• Supports a balanced, healthy diet\n\n` +
+            `**Suggested Additions**\n` +
+            `• 🥦 Broccoli — add more fiber and vitamin C\n` +
+            `• 🍗 Chicken — complete your meals with lean protein\n\n` +
             `_AI insights temporarily unavailable._`
         );
       } finally {
@@ -106,17 +109,56 @@ const SummaryPage = () => {
               <span className="font-body">Analyzing your shopping trip...</span>
             </div>
           ) : (
-            <div className="prose prose-sm max-w-none font-body text-foreground">
-              {summary.split("\n").map((line, i) => (
-                <p
-                  key={i}
-                  className={`${line.startsWith("•") ? "ml-4" : ""} ${
-                    line.startsWith("_") ? "text-muted-foreground italic text-xs" : ""
-                  } ${line.startsWith("**") ? "font-display font-bold text-base mt-3" : ""} mb-1`}
-                >
-                  {line.replace(/\*\*/g, "").replace(/_/g, "")}
-                </p>
-              ))}
+            <div className="font-body text-foreground space-y-1">
+              {summary.split("\n").map((line, i) => {
+                const trimmed = line.trim();
+                if (!trimmed) return null;
+
+                // Section headings (e.g. **Nutritional Facts**)
+                if (trimmed.startsWith("**") && trimmed.endsWith("**")) {
+                  return (
+                    <h4 key={i} className="font-display font-bold text-sm text-primary mt-4 mb-2 border-b border-primary/20 pb-1">
+                      {trimmed.replace(/\*\*/g, "")}
+                    </h4>
+                  );
+                }
+
+                // Bullet points with bold highlights
+                if (trimmed.startsWith("•")) {
+                  const parts = trimmed.slice(2); // remove "• "
+                  // Bold text before "—" or ":"
+                  const separatorMatch = parts.match(/^(.+?)\s*[—:]\s*(.+)$/);
+                  if (separatorMatch) {
+                    return (
+                      <div key={i} className="flex items-start gap-2 ml-2 py-0.5">
+                        <span className="text-primary mt-0.5">•</span>
+                        <p className="text-xs">
+                          <span className="font-bold text-foreground">{separatorMatch[1]}</span>
+                          <span className="text-muted-foreground"> — {separatorMatch[2]}</span>
+                        </p>
+                      </div>
+                    );
+                  }
+                  return (
+                    <div key={i} className="flex items-start gap-2 ml-2 py-0.5">
+                      <span className="text-primary mt-0.5">•</span>
+                      <p className="text-xs text-foreground">{parts}</p>
+                    </div>
+                  );
+                }
+
+                // Italic fallback text
+                if (trimmed.startsWith("_")) {
+                  return (
+                    <p key={i} className="text-muted-foreground italic text-xs mt-2">
+                      {trimmed.replace(/_/g, "")}
+                    </p>
+                  );
+                }
+
+                // Regular text
+                return <p key={i} className="text-xs mb-1">{trimmed.replace(/\*\*/g, "")}</p>;
+              })}
             </div>
           )}
         </div>
