@@ -2,8 +2,23 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, LogOut, MapPin } from "lucide-react";
+import { ShoppingCart, LogOut, Check } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
+import mascotImg from "@/assets/mascot.png";
+
+type GroceryItem = {
+  id: string;
+  name: string;
+  emoji: string;
+  aisle: string;
+  price: string;
+};
+
+const GROCERY_ITEMS: GroceryItem[] = [
+  { id: "carrots", name: "Carrot", emoji: "🥕", aisle: "Aisle 3", price: "$1.99" },
+  { id: "eggs", name: "Eggs", emoji: "🥚", aisle: "Aisle 9", price: "$2.95" },
+  { id: "milk", name: "Milk", emoji: "🥛", aisle: "Aisle 12", price: "$3.25" },
+];
 
 const Index = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -33,74 +48,78 @@ const Index = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen sky-gradient flex items-center justify-center">
         <ShoppingCart className="w-12 h-12 text-primary animate-cart-bounce" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl gradient-hero flex items-center justify-center">
-            <ShoppingCart className="w-5 h-5 text-primary-foreground" />
+    <div className="min-h-screen sky-gradient relative overflow-hidden">
+      {/* Mountain wave */}
+      <div className="mountain-wave" />
+
+      {/* Logout button */}
+      <div className="absolute top-4 right-4 z-20">
+        <Button variant="ghost" size="icon" onClick={handleLogout} className="text-muted-foreground">
+          <LogOut className="w-4 h-4" />
+        </Button>
+      </div>
+
+      <main className="relative z-10 flex flex-col items-center px-4 pt-10 pb-32 max-w-md mx-auto">
+        {/* Title */}
+        <h1 className="text-2xl font-display font-bold text-primary text-center mb-4 animate-slide-up">
+          Add groceries to<br />your list!
+        </h1>
+
+        {/* Floating grocery emojis */}
+        <div className="relative w-full h-20 mb-2 animate-slide-up" style={{ animationDelay: "0.05s" }}>
+          <span className="absolute left-[5%] top-2 text-2xl animate-float" style={{ animationDelay: "0s" }}>🥬</span>
+          <span className="absolute left-[22%] top-0 text-2xl animate-float" style={{ animationDelay: "0.3s" }}>🥚</span>
+          <span className="absolute left-[42%] top-1 text-2xl animate-float" style={{ animationDelay: "0.6s" }}>🥛</span>
+          <span className="absolute left-[62%] top-0 text-2xl animate-float" style={{ animationDelay: "0.9s" }}>🍎</span>
+          <span className="absolute left-[80%] top-2 text-2xl animate-float" style={{ animationDelay: "1.2s" }}>🍖</span>
+        </div>
+
+        {/* Mascot with basket */}
+        <div className="mb-6 animate-slide-up" style={{ animationDelay: "0.1s" }}>
+          <img src={mascotImg} alt="Mascot" className="w-32 h-32 mx-auto animate-float" />
+        </div>
+
+        {/* Next button */}
+        <Button
+          variant="hero"
+          size="lg"
+          className="rounded-full px-10 mb-8 animate-slide-up"
+          style={{ animationDelay: "0.15s" }}
+          onClick={() => navigate("/map")}
+        >
+          Next
+        </Button>
+
+        {/* Item List */}
+        <div className="w-full animate-slide-up" style={{ animationDelay: "0.2s" }}>
+          <h2 className="text-lg font-display font-bold text-foreground text-center mb-4">Item List</h2>
+
+          <div className="space-y-3">
+            {GROCERY_ITEMS.map((item) => (
+              <div
+                key={item.id}
+                className="grocery-card flex items-center gap-4 p-4"
+              >
+                <span className="text-2xl">{item.emoji}</span>
+                <div className="flex-1">
+                  <span className="font-display font-bold text-foreground">{item.name}</span>
+                  <span className="text-sm text-muted-foreground font-body ml-2">
+                    {item.aisle} · {item.price}
+                  </span>
+                </div>
+                <div className="w-8 h-8 rounded-full bg-primary/10 border-2 border-primary/30 flex items-center justify-center">
+                  <Check className="w-4 h-4 text-primary" />
+                </div>
+              </div>
+            ))}
           </div>
-          <h1 className="text-xl font-display font-bold text-foreground">GroceryGuide</h1>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-muted-foreground font-body hidden sm:block">{user?.email}</span>
-          <Button variant="ghost" size="icon" onClick={handleLogout}>
-            <LogOut className="w-4 h-4" />
-          </Button>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="container max-w-4xl mx-auto px-4 py-8">
-        <div className="text-center mb-8 animate-slide-up">
-          <h2 className="text-3xl font-display font-bold text-foreground mb-2">
-            Welcome to Your Smart Grocery Trip! 🥕
-          </h2>
-          <p className="text-muted-foreground font-body text-lg">
-            Let us guide you through the store to find eggs, carrots & milk
-          </p>
-        </div>
-
-        {/* Shopping List Preview */}
-        <div className="grocery-card mb-6 animate-slide-up" style={{ animationDelay: "0.1s" }}>
-          <h3 className="font-display font-bold text-lg text-foreground mb-4">📋 Today's Shopping List</h3>
-          <div className="grid grid-cols-3 gap-4">
-            <div className="flex flex-col items-center gap-2 p-4 rounded-xl bg-muted">
-              <span className="text-3xl">🥚</span>
-              <span className="font-body font-semibold text-foreground text-sm">Eggs</span>
-              <span className="text-xs text-muted-foreground">Aisle 3</span>
-            </div>
-            <div className="flex flex-col items-center gap-2 p-4 rounded-xl bg-muted">
-              <span className="text-3xl">🥕</span>
-              <span className="font-body font-semibold text-foreground text-sm">Carrots</span>
-              <span className="text-xs text-muted-foreground">Produce</span>
-            </div>
-            <div className="flex flex-col items-center gap-2 p-4 rounded-xl bg-muted">
-              <span className="text-3xl">🥛</span>
-              <span className="font-body font-semibold text-foreground text-sm">Milk</span>
-              <span className="text-xs text-muted-foreground">Dairy</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Start Shopping Button */}
-        <div className="text-center animate-slide-up" style={{ animationDelay: "0.2s" }}>
-          <Button
-            variant="hero"
-            size="lg"
-            className="rounded-2xl px-10 py-6 text-lg"
-            onClick={() => navigate("/map")}
-          >
-            <MapPin className="w-5 h-5 mr-2" />
-            Start Shopping Trip
-          </Button>
         </div>
       </main>
     </div>

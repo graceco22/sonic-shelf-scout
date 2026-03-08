@@ -6,48 +6,49 @@
 
 @layer base {
   :root {
-    --background: 45 100% 97%;
-    --foreground: 220 30% 15%;
+    --background: 210 100% 97%;
+    --foreground: 220 40% 20%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 220 30% 15%;
+    --card: 210 60% 98%;
+    --card-foreground: 220 40% 20%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 30% 15%;
+    --popover-foreground: 220 40% 20%;
 
-    --primary: 145 60% 42%;
+    --primary: 220 80% 55%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 35 95% 60%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 210 70% 88%;
+    --secondary-foreground: 220 60% 30%;
 
-    --muted: 45 30% 92%;
-    --muted-foreground: 220 10% 45%;
+    --muted: 210 40% 94%;
+    --muted-foreground: 220 15% 50%;
 
-    --accent: 280 60% 55%;
+    --accent: 340 65% 60%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 45 20% 88%;
-    --input: 45 20% 88%;
-    --ring: 145 60% 42%;
+    --border: 210 30% 90%;
+    --input: 210 30% 90%;
+    --ring: 220 80% 55%;
 
     --radius: 1rem;
 
     --grocery-red: 0 75% 55%;
-    --grocery-blue: 210 80% 55%;
+    --grocery-blue: 220 80% 55%;
     --grocery-yellow: 45 95% 55%;
-    --grocery-pink: 340 75% 60%;
+    --grocery-pink: 340 65% 60%;
     --grocery-teal: 175 65% 45%;
 
-    --gradient-hero: linear-gradient(135deg, hsl(145, 60%, 42%), hsl(175, 65%, 45%));
+    --gradient-sky: linear-gradient(180deg, hsl(210, 90%, 72%) 0%, hsl(210, 100%, 88%) 50%, hsl(210, 60%, 96%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(220, 80%, 55%), hsl(210, 90%, 65%));
     --gradient-warm: linear-gradient(135deg, hsl(35, 95%, 60%), hsl(0, 75%, 55%));
     --gradient-fun: linear-gradient(135deg, hsl(280, 60%, 55%), hsl(340, 75%, 60%));
 
-    --shadow-card: 0 4px 20px -4px hsl(145 60% 42% / 0.15);
-    --shadow-elevated: 0 8px 30px -8px hsl(220 30% 15% / 0.2);
+    --shadow-card: 0 4px 20px -4px hsl(220 80% 55% / 0.1);
+    --shadow-elevated: 0 8px 30px -8px hsl(220 40% 20% / 0.15);
 
     --font-display: 'Fredoka', sans-serif;
     --font-body: 'Nunito', sans-serif;
@@ -79,8 +80,12 @@
 }
 
 @layer components {
+  .sky-gradient {
+    background: var(--gradient-sky);
+  }
+
   .grocery-card {
-    @apply rounded-2xl bg-card p-6 border border-border;
+    @apply rounded-2xl bg-card/80 p-6 border border-border backdrop-blur-sm;
     box-shadow: var(--shadow-card);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
@@ -100,6 +105,16 @@
 
   .gradient-fun {
     background: var(--gradient-fun);
+  }
+
+  .mountain-wave {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 120px;
+    background: linear-gradient(180deg, transparent 0%, hsl(210, 60%, 92%) 40%, hsl(210, 50%, 96%) 100%);
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
   }
 }
 
@@ -125,4 +140,10 @@
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
   50% { transform: translateY(-10px); }
+}
+
+@keyframes wobble {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-3deg); }
+  75% { transform: rotate(3deg); }
 }
