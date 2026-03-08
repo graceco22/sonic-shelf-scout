@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Play, Square, ChevronRight, ArrowLeft, Volume2, Check } from "lucide-react";
@@ -24,6 +24,41 @@ const ITEMS: GroceryItem[] = [
 
 const CART_START = { x: 50, y: 50 };
 
+type Point = { x: number; y: number };
+
+// Aisle shelf boundaries (obstacles)
+const AISLES = [
+  { x1: 140, x2: 178 },
+  { x1: 250, x2: 288 },
+  { x1: 360, x2: 398 },
+];
+
+const TOP_CORRIDOR_Y = 40;
+const BOTTOM_CORRIDOR_Y = 360;
+
+function pathCrossesAisle(fromX: number, toX: number): boolean {
+  const minX = Math.min(fromX, toX);
+  const maxX = Math.max(fromX, toX);
+  return AISLES.some((a) => minX < a.x2 && maxX > a.x1);
+}
+
+function computePath(from: Point, to: Point): Point[] {
+  if (pathCrossesAisle(from.x, to.x)) {
+    const topDist = Math.abs(from.y - TOP_CORRIDOR_Y) + Math.abs(to.y - TOP_CORRIDOR_Y);
+    const bottomDist = Math.abs(from.y - BOTTOM_CORRIDOR_Y) + Math.abs(to.y - BOTTOM_CORRIDOR_Y);
+    const corridorY = topDist <= bottomDist ? TOP_CORRIDOR_Y : BOTTOM_CORRIDOR_Y;
+    return [
+      { x: from.x, y: corridorY },
+      { x: to.x, y: corridorY },
+      to,
+    ];
+  }
+  if (Math.abs(from.x - to.x) > 2) {
+    return [{ x: to.x, y: from.y }, to];
+  }
+  return [to];
+}
+
 const MapPage = () => {
   const navigate = useNavigate();
   const [currentItemIndex, setCurrentItemIndex] = useState(0);
@@ -33,13 +68,24 @@ const MapPage = () => {
   const [collectedItems, setCollectedItems] = useState<string[]>([]);
   const [showNutrition, setShowNutrition] = useState<string | null>(null);
   const [isVoicePlaying, setIsVoicePlaying] = useState(false);
+  const [waypoints, setWaypoints] = useState<Point[]>([]);
+  const [waypointIndex, setWaypointIndex] = useState(0);
 
   const currentItem = ITEMS[currentItemIndex];
   const allCollected = collectedItems.length === ITEMS.length;
 
+  // Preview path when not moving
+  const previewPath = useMemo(() => {
+    if (isMoving || !currentItem || arrived || collectedItems.includes(currentItem.id)) return [];
+    return computePath(cartPosition, { x: currentItem.x, y: currentItem.y });
+  }, [isMoving, currentItem, arrived, collectedItems, cartPosition]);
+
+  const displayPath = isMoving ? waypoints.slice(waypointIndex) : previewPath;
+
   useEffect(() => {
-    if (!isMoving || !currentItem) return;
-    const target = { x: currentItem.x, y: currentItem.y };
+    if (!isMoving || waypoints.length === 0) return;
+    const target = waypoints[waypointIndex];
+    if (!target) return;
     const speed = 2;
     const interval = setInterval(() => {
       setCartPosition((prev) => {
@@ -47,9 +93,13 @@ const MapPage = () => {
         const dy = target.y - prev.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
         if (dist < speed) {
-          setIsMoving(false);
-          setArrived(true);
-          toast.success(`Found ${currentItem.emoji} ${currentItem.name}!`);
+          if (waypointIndex < waypoints.length - 1) {
+            setWaypointIndex((i) => i + 1);
+          } else {
+            setIsMoving(false);
+            setArrived(true);
+            toast.success(`Found ${currentItem!.emoji} ${currentItem!.name}!`);
+          }
           return target;
         }
         return {
@@ -59,10 +109,13 @@ const MapPage = () => {
       });
     }, 16);
     return () => clearInterval(interval);
-  }, [isMoving, currentItem]);
+  }, [isMoving, waypointIndex, waypoints, currentItem]);
 
   const handleStart = () => {
     if (!currentItem) return;
+    const path = computePath(cartPosition, { x: currentItem.x, y: currentItem.y });
+    setWaypoints(path);
+    setWaypointIndex(0);
     setIsMoving(true);
     setArrived(false);
   };
@@ -173,6 +226,7 @@ const MapPage = () => {
                 items={ITEMS}
                 collectedItems={collectedItems}
                 isMoving={isMoving}
+                pathPoints={displayPath}
               />
             </div>
 

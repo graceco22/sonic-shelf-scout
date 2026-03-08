@@ -15,6 +15,7 @@ interface StoreMapSVGProps {
   items: GroceryItem[];
   collectedItems: string[];
   isMoving: boolean;
+  pathPoints?: { x: number; y: number }[];
 }
 
 const StoreMapSVG: React.FC<StoreMapSVGProps> = ({
@@ -23,6 +24,7 @@ const StoreMapSVG: React.FC<StoreMapSVGProps> = ({
   items,
   collectedItems,
   isMoving,
+  pathPoints,
 }) => {
   return (
     <svg viewBox="0 0 550 400" className="w-full h-auto rounded-xl" style={{ background: "hsl(220, 40%, 98%)" }}>
@@ -45,12 +47,10 @@ const StoreMapSVG: React.FC<StoreMapSVGProps> = ({
       <text x="480" y="52" textAnchor="middle" fontSize="10" fontWeight="600" fill="hsl(220, 50%, 50%)" fontFamily="DM Sans, sans-serif">🏪 Entrance</text>
 
       {/* Animated path to target */}
-      {targetItem && !collectedItems.includes(targetItem.id) && (
-        <line
-          x1={cartPosition.x}
-          y1={cartPosition.y}
-          x2={targetItem.x}
-          y2={targetItem.y}
+      {pathPoints && pathPoints.length > 0 && targetItem && !collectedItems.includes(targetItem.id) && (
+        <polyline
+          points={[`${cartPosition.x},${cartPosition.y}`, ...pathPoints.map(p => `${p.x},${p.y}`)].join(' ')}
+          fill="none"
           stroke="hsl(220, 60%, 60%)"
           strokeWidth="2"
           strokeDasharray="6 4"
@@ -58,7 +58,7 @@ const StoreMapSVG: React.FC<StoreMapSVGProps> = ({
           opacity="0.5"
         >
           <animate attributeName="stroke-dashoffset" from="24" to="0" dur="1s" repeatCount="indefinite" />
-        </line>
+        </polyline>
       )}
 
       {/* Items */}
