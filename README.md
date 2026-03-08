@@ -1,4 +1,4 @@
-# Welcome to your Lovable project
+# HopCart
 
 ## Project info
 
