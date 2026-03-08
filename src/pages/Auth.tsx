@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { ShoppingCart, Lock, Mail, Eye, EyeOff, Shield } from "lucide-react";
+import { Lock, Mail, Eye, EyeOff, Shield } from "lucide-react";
+import mascotImg from "@/assets/mascot.png";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -50,32 +51,37 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Logo Area */}
-        <div className="text-center mb-8 animate-slide-up">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl gradient-hero mb-4 animate-float">
-            <ShoppingCart className="w-10 h-10 text-primary-foreground" />
-          </div>
+    <div className="min-h-screen sky-gradient flex flex-col items-center justify-center p-4 relative overflow-hidden">
+      {/* Mountain wave decoration */}
+      <div className="mountain-wave" />
+
+      <div className="w-full max-w-sm relative z-10">
+        {/* Mascot */}
+        <div className="text-center mb-6 animate-slide-up">
+          <img
+            src={mascotImg}
+            alt="GroceryGuide mascot"
+            className="w-28 h-28 mx-auto mb-3 animate-float"
+          />
           <h1 className="text-3xl font-display font-bold text-foreground">GroceryGuide</h1>
-          <p className="text-muted-foreground mt-1 font-body">Your smart grocery shopping companion</p>
+          <p className="text-muted-foreground mt-1 font-body text-sm">Your smart grocery companion</p>
         </div>
 
         {/* Security Badge */}
-        <div className="flex items-center justify-center gap-2 mb-6 animate-slide-up" style={{ animationDelay: "0.1s" }}>
-          <Shield className="w-4 h-4 text-primary" />
-          <span className="text-xs text-muted-foreground font-body">End-to-end encrypted • Your data stays private</span>
+        <div className="flex items-center justify-center gap-2 mb-4 animate-slide-up" style={{ animationDelay: "0.1s" }}>
+          <Shield className="w-3.5 h-3.5 text-primary" />
+          <span className="text-xs text-muted-foreground font-body">Encrypted & private</span>
         </div>
 
         {/* Auth Card */}
-        <div className="grocery-card animate-slide-up" style={{ animationDelay: "0.2s" }}>
-          <h2 className="text-xl font-display font-bold text-foreground mb-6">
+        <div className="grocery-card animate-slide-up" style={{ animationDelay: "0.15s" }}>
+          <h2 className="text-lg font-display font-bold text-foreground mb-5 text-center">
             {isLogin ? "Welcome Back" : "Create Account"}
           </h2>
 
           <form onSubmit={handleAuth} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email" className="font-body font-semibold text-foreground">Email</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="email" className="font-body font-semibold text-foreground text-sm">Email</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
@@ -90,8 +96,8 @@ const Auth = () => {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password" className="font-body font-semibold text-foreground">Password</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="password" className="font-body font-semibold text-foreground text-sm">Password</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
@@ -114,19 +120,12 @@ const Auth = () => {
               </div>
             </div>
 
-            {!isLogin && (
-              <div className="rounded-xl bg-muted p-3 text-xs text-muted-foreground font-body">
-                <Shield className="w-3 h-3 inline mr-1" />
-                Your password is securely hashed. We never store plain text passwords.
-              </div>
-            )}
-
             <Button type="submit" variant="hero" size="lg" className="w-full rounded-xl" disabled={loading}>
               {loading ? "Please wait..." : isLogin ? "Sign In" : "Create Account"}
             </Button>
           </form>
 
-          <div className="mt-6 text-center">
+          <div className="mt-5 text-center">
             <button
               onClick={() => setIsLogin(!isLogin)}
               className="text-sm text-primary hover:underline font-body font-semibold"
@@ -136,10 +135,8 @@ const Auth = () => {
           </div>
         </div>
 
-        {/* Security Footer */}
-        <div className="mt-6 text-center text-xs text-muted-foreground font-body animate-slide-up" style={{ animationDelay: "0.3s" }}>
+        <div className="mt-4 text-center text-xs text-muted-foreground font-body animate-slide-up" style={{ animationDelay: "0.25s" }}>
           <p>🔒 Secured with industry-standard encryption</p>
-          <p className="mt-1">Your grocery data is private and never shared</p>
         </div>
       </div>
     </div>
