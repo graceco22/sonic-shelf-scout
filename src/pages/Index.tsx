@@ -66,14 +66,15 @@ const Index = () => {
         </Button>
       </div>
 
-      <main className="relative z-10 flex flex-col items-center px-4 pt-10 pb-32 max-w-md mx-auto">
+      <main className="relative z-10 flex flex-col items-center px-4 pt-10 pb-32 max-w-lg mx-auto">
         {/* Title */}
-        <h1 className="text-2xl font-display font-bold text-primary text-center mb-4 animate-slide-up">
-          Add groceries to<br />your list!
+        <h1 className="text-2xl font-display font-bold text-primary text-center mb-4 animate-slide-up w-full max-w-xl whitespace-nowrap">
+          Add groceries to your list!
         </h1>
 
         {/* Floating grocery emojis */}
-        <div className="relative w-full h-20 mb-2 animate-slide-up" style={{ animationDelay: "0.05s" }}>
+        <br></br>
+        <div className="relative w-full h-16 animate-slide-up" style={{ animationDelay: "0.05s" }}>
           <span className="absolute left-[5%] top-2 text-2xl animate-float" style={{ animationDelay: "0s" }}>🥬</span>
           <span className="absolute left-[22%] top-0 text-2xl animate-float" style={{ animationDelay: "0.3s" }}>🥚</span>
           <span className="absolute left-[42%] top-1 text-2xl animate-float" style={{ animationDelay: "0.6s" }}>🥛</span>
@@ -82,8 +83,8 @@ const Index = () => {
         </div>
 
         {/* Mascot with basket */}
-        <div className="mb-6 animate-slide-up" style={{ animationDelay: "0.1s" }}>
-          <img src={mascotImg} alt="Mascot" className="w-32 h-32 mx-auto animate-float" />
+        <div className="mb-1 animate-slide-up" style={{ animationDelay: "0.1s" }}>
+          <img src={mascotImg} alt="Mascot" className="w-96 h-52 mx-auto mb-5 animate-float" />
         </div>
 
         {/* Next button */}

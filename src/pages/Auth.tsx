@@ -55,13 +55,13 @@ const Auth = () => {
       {/* Mountain wave decoration */}
       <div className="mountain-wave" />
 
-      <div className="w-full max-w-sm relative z-10">
+      <div className="w-full max-w-md relative z-10">
         {/* Mascot */}
         <div className="text-center mb-6 animate-slide-up">
           <img
             src={mascotImg}
             alt="GroceryGuide mascot"
-            className="w-28 h-28 mx-auto mb-3 animate-float"
+            className="w-50 h-40 mx-auto mb-5 animate-float"
           />
           <h1 className="text-3xl font-display font-bold text-foreground">GroceryGuide</h1>
           <p className="text-muted-foreground mt-1 font-body text-sm">Your smart grocery companion</p>

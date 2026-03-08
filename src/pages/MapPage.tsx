@@ -133,14 +133,14 @@ const MapPage = () => {
         </Button>
       </div>
 
-      <main className="relative z-10 max-w-lg mx-auto px-4 pb-32">
+      <main className="relative z-10 max-w-xl mx-auto px-4 pb-32">
         {allCollected && !showNutrition ? (
           <div className="text-center py-12 animate-slide-up">
             <div className="text-6xl mb-4">🎉</div>
             <h2 className="text-2xl font-display font-bold text-foreground mb-2">All Items Collected!</h2>
             <p className="text-muted-foreground font-body mb-6">Great job on your healthy grocery run!</p>
-            <Button variant="hero" className="rounded-full px-10" onClick={() => navigate("/")}>
-              Back to Home
+            <Button variant="hero" className="rounded-full px-10" onClick={() => navigate("/summary", { state: { items: ITEMS.map(i => ({ name: i.name, emoji: i.emoji, price: i.price })) } })}>
+              View Shopping Summary
             </Button>
           </div>
         ) : showNutrition ? (
