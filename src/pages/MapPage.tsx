@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Volume2, Check } from "lucide-react";
+import { Play, Square, ChevronRight, ArrowLeft, Volume2, Check } from "lucide-react";
 import { toast } from "sonner";
+import StoreMapSVG from "@/components/StoreMapSVG";
 import NutritionPanel from "@/components/NutritionPanel";
-import mascotImg from "@/assets/mascot.png";
 
 type GroceryItem = {
   id: string;
@@ -12,18 +12,23 @@ type GroceryItem = {
   emoji: string;
   aisle: string;
   price: string;
+  x: number;
+  y: number;
 };
 
 const ITEMS: GroceryItem[] = [
-  { id: "carrots", name: "Carrot", emoji: "🥕", aisle: "Aisle 3", price: "$1.99" },
-  { id: "eggs", name: "Eggs", emoji: "🥚", aisle: "Aisle 9", price: "$2.95" },
-  { id: "milk", name: "Milk", emoji: "🥛", aisle: "Aisle 12", price: "$3.25" },
+  { id: "carrots", name: "Carrot", emoji: "🥕", aisle: "Aisle 3", price: "$1.99", x: 100, y: 280 },
+  { id: "eggs", name: "Eggs", emoji: "🥚", aisle: "Aisle 9", price: "$2.95", x: 350, y: 120 },
+  { id: "milk", name: "Milk", emoji: "🥛", aisle: "Aisle 12", price: "$3.25", x: 450, y: 320 },
 ];
+
+const CART_START = { x: 50, y: 50 };
 
 const MapPage = () => {
   const navigate = useNavigate();
   const [currentItemIndex, setCurrentItemIndex] = useState(0);
-  const [isNavigating, setIsNavigating] = useState(false);
+  const [isMoving, setIsMoving] = useState(false);
+  const [cartPosition, setCartPosition] = useState(CART_START);
   const [arrived, setArrived] = useState(false);
   const [collectedItems, setCollectedItems] = useState<string[]>([]);
   const [showNutrition, setShowNutrition] = useState<string | null>(null);
@@ -32,21 +37,37 @@ const MapPage = () => {
   const currentItem = ITEMS[currentItemIndex];
   const allCollected = collectedItems.length === ITEMS.length;
 
-  // Simulate navigation
   useEffect(() => {
-    if (!isNavigating) return;
-    const timer = setTimeout(() => {
-      setIsNavigating(false);
-      setArrived(true);
-      toast.success(`Found ${currentItem?.emoji} ${currentItem?.name}!`);
-    }, 2500);
-    return () => clearTimeout(timer);
-  }, [isNavigating, currentItem]);
+    if (!isMoving || !currentItem) return;
+    const target = { x: currentItem.x, y: currentItem.y };
+    const speed = 2;
+    const interval = setInterval(() => {
+      setCartPosition((prev) => {
+        const dx = target.x - prev.x;
+        const dy = target.y - prev.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < speed) {
+          setIsMoving(false);
+          setArrived(true);
+          toast.success(`Found ${currentItem.emoji} ${currentItem.name}!`);
+          return target;
+        }
+        return {
+          x: prev.x + (dx / dist) * speed,
+          y: prev.y + (dy / dist) * speed,
+        };
+      });
+    }, 16);
+    return () => clearInterval(interval);
+  }, [isMoving, currentItem]);
 
   const handleStart = () => {
-    setIsNavigating(true);
+    if (!currentItem) return;
+    setIsMoving(true);
     setArrived(false);
   };
+
+  const handleStop = () => setIsMoving(false);
 
   const handleCollect = () => {
     if (!currentItem) return;
@@ -95,15 +116,12 @@ const MapPage = () => {
     <div className="min-h-screen sky-gradient relative overflow-hidden">
       <div className="mountain-wave" />
 
-      {/* Back button */}
-      <div className="absolute top-4 left-4 z-20">
+      {/* Header */}
+      <div className="relative z-20 flex items-center justify-between px-4 py-3">
         <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="text-muted-foreground">
           <ArrowLeft className="w-4 h-4 mr-1" /> Back
         </Button>
-      </div>
-
-      {/* Voice guide */}
-      <div className="absolute top-4 right-4 z-20">
+        <h1 className="font-display font-bold text-foreground text-lg">Store Map</h1>
         <Button
           variant="ghost"
           size="sm"
@@ -115,7 +133,7 @@ const MapPage = () => {
         </Button>
       </div>
 
-      <main className="relative z-10 flex flex-col items-center px-4 pt-14 pb-32 max-w-md mx-auto">
+      <main className="relative z-10 max-w-lg mx-auto px-4 pb-32">
         {allCollected && !showNutrition ? (
           <div className="text-center py-12 animate-slide-up">
             <div className="text-6xl mb-4">🎉</div>
@@ -135,79 +153,65 @@ const MapPage = () => {
           />
         ) : (
           <>
-            {/* Heading */}
-            <h1 className="text-2xl font-display font-bold text-primary text-center mb-2 animate-slide-up">
-              {isNavigating ? "Let's find your\ngroceries!" : arrived ? `Found ${currentItem?.emoji}!` : "Press Start and\nwe'll guide you!"}
-            </h1>
-
-            {/* Current target icon */}
-            {currentItem && !arrived && (
-              <div className="w-16 h-16 rounded-full bg-card border-2 border-border flex items-center justify-center mb-4 animate-slide-up" style={{ animationDelay: "0.05s" }}>
-                <span className="text-2xl">{currentItem.emoji}</span>
-              </div>
-            )}
-
-            {/* Aisle visualization */}
-            <div className="w-full max-w-[280px] h-48 relative mb-4 animate-slide-up" style={{ animationDelay: "0.1s" }}>
-              {/* Aisle walls */}
-              <div className="absolute left-4 top-0 bottom-0 w-16 bg-muted/60 rounded-lg" />
-              <div className="absolute right-4 top-0 bottom-0 w-16 bg-muted/60 rounded-lg" />
-
-              {/* Mascot walking */}
-              <div className={`absolute left-1/2 -translate-x-1/2 transition-all duration-[2500ms] ease-in-out ${isNavigating ? "top-4" : "bottom-4"}`}>
-                <img
-                  src={mascotImg}
-                  alt="Guide mascot"
-                  className={`w-24 h-24 ${isNavigating ? "animate-cart-bounce" : "animate-float"}`}
-                />
-              </div>
-
-              {/* Target item at top of aisle */}
-              {currentItem && (
-                <div className={`absolute top-2 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-card border-2 border-primary/30 flex items-center justify-center transition-opacity ${isNavigating || arrived ? "opacity-100" : "opacity-60"}`}>
-                  <span className="text-lg">{currentItem.emoji}</span>
+            {/* Current Target */}
+            <div className="grocery-card mb-4 animate-slide-up">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-3xl">{currentItem?.emoji}</span>
+                  <div>
+                    <h3 className="font-display font-bold text-foreground">{currentItem?.name}</h3>
+                    <p className="text-sm text-muted-foreground font-body">{currentItem?.aisle}</p>
+                  </div>
                 </div>
-              )}
+                <span className="text-sm text-muted-foreground font-body">{currentItem?.price}</span>
+              </div>
             </div>
 
-            {/* Action button */}
-            <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.15s" }}>
+            {/* Map */}
+            <div className="grocery-card mb-4 p-2 overflow-hidden animate-slide-up" style={{ animationDelay: "0.1s" }}>
+              <StoreMapSVG
+                cartPosition={cartPosition}
+                targetItem={currentItem}
+                items={ITEMS}
+                collectedItems={collectedItems}
+                isMoving={isMoving}
+              />
+            </div>
+
+            {/* Controls */}
+            <div className="flex gap-3 justify-center mb-6 animate-slide-up" style={{ animationDelay: "0.15s" }}>
               {arrived ? (
-                <Button variant="hero" size="lg" className="rounded-full px-10" onClick={handleCollect}>
+                <Button variant="hero" size="lg" className="rounded-full px-8" onClick={handleCollect}>
                   Collect {currentItem?.emoji} {currentItem?.name}
+                  <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               ) : (
-                <Button
-                  variant="hero"
-                  size="lg"
-                  className="rounded-full px-10"
-                  onClick={handleStart}
-                  disabled={isNavigating}
-                >
-                  {isNavigating ? "Finding..." : "Start"}
-                </Button>
+                <>
+                  <Button variant="hero" size="lg" className="rounded-full px-8" onClick={handleStart} disabled={isMoving}>
+                    <Play className="w-4 h-4 mr-1" /> Start
+                  </Button>
+                  <Button variant="secondary" size="lg" className="rounded-full px-8" onClick={handleStop} disabled={!isMoving}>
+                    <Square className="w-4 h-4 mr-1" /> Stop
+                  </Button>
+                </>
               )}
             </div>
 
             {/* Item List */}
-            <div className="w-full animate-slide-up" style={{ animationDelay: "0.2s" }}>
+            <div className="animate-slide-up" style={{ animationDelay: "0.2s" }}>
               <h2 className="text-lg font-display font-bold text-foreground text-center mb-1">Item List</h2>
-              <p className="text-sm text-muted-foreground font-body text-center mb-4">Up Next</p>
-
+              <p className="text-sm text-muted-foreground font-body text-center mb-3">
+                {collectedItems.length}/{ITEMS.length} collected
+              </p>
               <div className="space-y-3">
                 {ITEMS.map((item) => {
                   const isCollected = collectedItems.includes(item.id);
                   return (
-                    <div
-                      key={item.id}
-                      className={`grocery-card flex items-center gap-4 p-4 ${isCollected ? "opacity-60" : ""}`}
-                    >
+                    <div key={item.id} className={`grocery-card flex items-center gap-4 p-4 ${isCollected ? "opacity-60" : ""}`}>
                       <span className="text-2xl">{item.emoji}</span>
                       <div className="flex-1">
                         <span className="font-display font-bold text-foreground">{item.name}</span>
-                        <span className="text-sm text-muted-foreground font-body ml-2">
-                          {item.aisle} · {item.price}
-                        </span>
+                        <span className="text-sm text-muted-foreground font-body ml-2">{item.aisle} · {item.price}</span>
                       </div>
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isCollected ? "bg-primary text-primary-foreground" : "bg-primary/10 border-2 border-primary/30"}`}>
                         <Check className="w-4 h-4" />
